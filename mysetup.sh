@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 echo "🚀 Starting Ubuntu setup for frontend development..."
@@ -61,7 +60,7 @@ fi
 # Install RustDesk
 if ! command -v rustdesk >/dev/null 2>&1; then
     echo "🧷 Installing RustDesk..."
-    wget --timeout=60 -q https://github.com/rustdesk/rustdesk/releases/latest/download/rustdesk-1.2.3.deb -O rustdesk.deb         && sudo apt install -y ./rustdesk.deb         && echo "✅ RustDesk installed."         || echo "❌ RustDesk installation failed."
+    wget --timeout=60 -q https://github.com/rustdesk/rustdesk/releases/download/1.4.0/rustdesk-1.4.0-x86_64.deb -O rustdesk.deb         && sudo apt install -y ./rustdesk.deb         && echo "✅ RustDesk installed."         || echo "❌ RustDesk installation failed."
     rm -f rustdesk.deb
 else
     echo "✅ RustDesk already installed."
