@@ -149,3 +149,47 @@ gsettings set org.gnome.calculator number-format "thousands"
 # Pin favorite apps to dock
 echo "📌 Pinning favorite apps to dock..."
 gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'google-chrome.desktop', 'code.desktop', 'org.gnome.Terminal.desktop']"
+
+# Hardware and system installation check
+
+# Hardware and system installation check
+echo "🖥️ Collecting system hardware specs..."
+
+# RAM info
+ram_gb=$(free -g | awk '/^Mem:/{print $2}')
+ram_type=$(sudo dmidecode --type 17 | grep -m1 "Type:" | awk '{print $2}')
+ram_modules=$(sudo dmidecode --type 17 | grep "Size:" | grep -v "No Module Installed" | wc -l)
+cpu_model=$(lscpu | grep "Model name" | awk -F ':' '{print $2}' | sed 's/^[ \t]*//')
+disk_model=$(lsblk -d -o NAME,MODEL | grep -v "NAME" | awk '{print $2}' | head -n 1)
+
+echo "🔧 RAM Size : ${ram_gb} GB"
+echo "🔧 RAM Type : $ram_type"
+echo "🔧 RAM Modules : $ram_modules"
+echo "🧠 CPU Model : $cpu_model"
+echo "💾 Disk Model : $disk_model"
+
+if [[ "$ram_gb" -ge 16 && "$ram_type" == "DDR5" ]]; then
+    echo -e "\n🎉 Your system is well-equipped for frontend development!"
+    echo "💡 Wishing you productive and joyful coding! 🚀"
+else
+    echo -e "\n⚠️ Your system may need upgrades for optimal frontend development."
+fi
+
+echo ""
+echo "⏳ Checking Ubuntu installation date..."
+install_date=$(sudo tune2fs -l $(df / | tail -1 | awk '{print $1}') | grep 'Filesystem created:' | cut -d':' -f2- | xargs -0)
+install_timestamp=$(date -d "$install_date" +%s)
+now_timestamp=$(date +%s)
+age_days=$(((now_timestamp - install_timestamp) / 86400))
+
+echo "🗓️ Ubuntu installed on: $install_date"
+echo "📅 Days since installation: $age_days"
+
+if [ "$age_days" -lt 90 ]; then
+    echo -e "\n✅ Great! Your Ubuntu installation is recent. Enjoy your coding journey! 💻✨"
+else
+    echo -e "\n🔄 It's been more than 3 months since Ubuntu was installed."
+    echo "🛠️ Consider a clean reinstall for best performance and freshness. 📦"
+fi
+
+echo -e "\n✅ All setup tasks completed. You're good to go!"
