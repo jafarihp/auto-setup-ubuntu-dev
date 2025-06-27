@@ -151,22 +151,41 @@ echo "📌 Pinning favorite apps to dock..."
 gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'google-chrome.desktop', 'code.desktop', 'org.gnome.Terminal.desktop']"
 
 # Hardware and system installation check
-
-# Hardware and system installation check
 echo "🖥️ Collecting system hardware specs..."
 
 # RAM info
 ram_gb=$(free -g | awk '/^Mem:/{print $2}')
 ram_type=$(sudo dmidecode --type 17 | grep -m1 "Type:" | awk '{print $2}')
-ram_modules=$(sudo dmidecode --type 17 | grep "Size:" | grep -v "No Module Installed" | wc -l)
+ram_slots_total=$(sudo dmidecode --type 17 | grep -c "Locator:")
+installed_rams=$(sudo dmidecode --type 17 | awk '/^\s*Size: [0-9]+/ {count++} END {print count}')
 cpu_model=$(lscpu | grep "Model name" | awk -F ':' '{print $2}' | sed 's/^[ \t]*//')
-disk_model=$(lsblk -d -o NAME,MODEL | grep -v "NAME" | awk '{print $2}' | head -n 1)
+disk_info=$(lsblk -dno NAME,MODEL,SIZE | grep -v "loop" | head -n 1)
+if [ -n "$disk_info" ]; then
+    echo "💾 Disk Info            : $disk_info"
+else
+    nvme list 2>/dev/null | awk 'NR==4 {print "💾 NVMe Info            : " $2, $3, $4, $5, $6}'
+fi
 
-echo "🔧 RAM Size : ${ram_gb} GB"
-echo "🔧 RAM Type : $ram_type"
-echo "🔧 RAM Modules : $ram_modules"
-echo "🧠 CPU Model : $cpu_model"
-echo "💾 Disk Model : $disk_model"
+echo "🔧 RAM Size             : ${ram_gb} GB"
+echo "🔧 RAM Type             : $ram_type"
+echo "🧩 Total RAM Slots      : $ram_slots_total"
+echo "✅ Installed RAM Modules: $installed_rams"
+
+echo "📦 Installed RAM Details:"
+sudo dmidecode --type 17 | awk '
+  /Memory Device/,/^$/ {
+    if ($0 ~ /Size: [0-9]+/) print "🔸 " $0
+    else if ($0 ~ /Form Factor:/) print "   " $0
+    else if ($0 ~ /Locator:/) print "   " $0
+    else if ($0 ~ /Type: DDR/) print "   " $0
+    else if ($0 ~ /Speed:/ && $0 !~ /Configured/) print "   " $0
+    else if ($0 ~ /Total Width:/) print "   " $0
+    else if ($0 ~ /Data Width:/) print "   " $0
+  }
+'
+
+echo "🧠 CPU Model            : $cpu_model"
+echo "💾 Disk Model           : $disk_info"
 
 if [[ "$ram_gb" -ge 16 && "$ram_type" == "DDR5" ]]; then
     echo -e "\n🎉 Your system is well-equipped for frontend development!"
