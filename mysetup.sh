@@ -40,6 +40,43 @@ if ! command -v snap >/dev/null 2>&1; then
     sudo apt install -y snapd
 fi
 
+# Install FingrerPrint in Lenovo ThinkBook G7
+echo "🖐️🔐 Setting up fingerprint sensor (Lenovo ThinkBook G7)..."
+
+# Detect fingerprint sensor
+sensor_info=$(lsusb | grep -i fingerprint || true)
+
+if [ -n "$sensor_info" ]; then
+    echo "🧬 Fingerprint sensor detected: $sensor_info"
+
+    # Install base packages for fingerprint support
+    echo "� Installing fingerprint support packages..."
+    sudo apt install -y fprintd libpam-fprintd
+
+    # Check if it's a Goodix sensor
+    if echo "$sensor_info" | grep -iq "Goodix"; then
+        echo "🔎 Goodix sensor detected. Installing additional driver support..."
+
+        # Add PPA and install libfprint with Goodix support
+        sudo add-apt-repository -y ppa:3v1n0/libfprint-vfs0090
+        sudo apt update
+        sudo apt install -y libfprint-2-tod1 libfprint-2-tod-goodix
+    fi
+
+    # Restart fingerprint service
+    echo "� Restarting fingerprint service..."
+    sudo systemctl restart fprintd.service
+
+    # Enable fingerprint authentication
+    echo "🔐 Enabling fingerprint login for the current user..."
+    sudo pam-auth-update --enable fprintd
+
+    echo "✅ Fingerprint setup completed successfully!"
+    echo "👉 You can now enroll your fingerprint by running: fprintd-enroll"
+else
+    echo "⚠️ No fingerprint sensor detected. Skipping setup."
+fi
+
 # Install Google Chrome
 if ! command -v google-chrome >/dev/null 2>&1; then
     echo "🌐 Installing Google Chrome..."
