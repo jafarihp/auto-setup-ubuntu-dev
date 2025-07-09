@@ -110,6 +110,33 @@ else
     echo "✅ RustDesk already installed."
 fi
 
+echo "🔐 Installing WireGuard VPN client..."
+# Update APT and install WireGuard
+sudo apt update
+sudo apt install -y wireguard
+
+# Create directory for keys (in user home)
+wg_dir="$HOME/.wireguard"
+mkdir -p "$wg_dir"
+chmod 700 "$wg_dir"
+
+# Generate private and public keys
+echo "🧾 Generating WireGuard private and public keys..."
+wg genkey | tee "$wg_dir/privatekey" | wg pubkey >"$wg_dir/publickey"
+
+# Set proper permissions
+chmod 600 "$wg_dir/privatekey"
+chmod 644 "$wg_dir/publickey"
+
+# Show key locations
+echo "✅ WireGuard keys generated:"
+echo "🔐 Private key: $wg_dir/privatekey"
+echo "📢 Public key : $wg_dir/publickey"
+
+# Show public key for quick copy
+echo "📋 Your public key:"
+cat "$wg_dir/publickey"
+
 # Install or upgrade packages
 install_or_upgrade vlc
 install_or_upgrade git
