@@ -79,6 +79,24 @@ else
     echo "✅ Code Spell Checker extension already installed."
 fi
 
+echo ""
+echo "📦 Installing Node.js (LTS) and npm..."
+
+# Add NodeSource official LTS repo (e.g., 18.x or 20.x)
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+
+# Install Node.js and npm
+sudo apt-get install -y nodejs
+
+# Verify installation
+echo ""
+echo "🧪 Verifying Node.js and npm installation..."
+node_version=$(node -v)
+npm_version=$(npm -v)
+
+echo "✅ Node.js version: $node_version"
+echo "✅ npm version    : $npm_version"
+
 # Install Telegram via Snap (Manual method)
 if ! command -v telegram-desktop >/dev/null 2>&1; then
     echo "⬇️ Installing Telegram Desktop via Snap (manual method)..."
