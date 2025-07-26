@@ -79,10 +79,29 @@ else
     echo "✅ Code Spell Checker extension already installed."
 fi
 
-echo ""
-echo "📦 Installing Node.js (LTS) and npm..."
+# Add GitHub CLI apt repository
+echo "🐙 Installing GitHub CLI (gh)..."
+type -p curl >/dev/null || sudo apt install curl -y
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+  && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+
+echo "📦 Adding GitHub CLI repository..."
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
+  sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
+# Update and install gh
+sudo apt update
+sudo apt install gh -y
+ 
+# Verify installation gh
+if command -v gh >/dev/null 2>&1; then
+    echo "✅ GitHub CLI installed successfully: $(gh --version | head -n1)"
+else
+    echo "❌ GitHub CLI installation failed."
+fi
 
 # Add NodeSource official LTS repo (e.g., 18.x or 20.x)
+echo "📦 Installing Node.js (LTS) and npm..."
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 
 # Install Node.js and npm
